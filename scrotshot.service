@@ -1,0 +1,15 @@
+[Unit]
+Description=Scrotshot Service
+After=network.target
+
+[Service]
+User=root
+ExecStart=/bin/bash -c 'for ((burst=1; burst <= 3; burst++)); do for ((count=1; count <= 5; count++)); do timestamp=$(date +%Y%m%d%H%M%S); filename="/home/siebel/Pictures/scrotshot//screenshot_penetratingnu_${timestamp}.png"; scrot "$filename"; sleep 10; done; echo "Please find attached the screenshots taken every 2 minutes." | mail -s "Scrotshot Reminders (Burst $burst)" -A "/home/siebel/Pictures/scrotshot/"/*.png "mrubuntuman@gmail.com"; if [[ $burst -lt 3 ]]; then sleep 120; fi; done'
+Restart=always
+RestartSec=10
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=scrotshot
+
+[Install]
+WantedBy=multi-user.target
