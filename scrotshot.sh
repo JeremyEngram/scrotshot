@@ -7,7 +7,8 @@ SHOT_INTERVAL=10
 BURST_INTERVAL=120
 OUTPUT_DIR="$HOME/scrotshot"
 LOG_FILE="$OUTPUT_DIR/scrotshot.log"
-EMAIL="mrubuntuman@gmail.com"
+EMAIL_TO="root@localhost"
+EMAIL_CC="jeremy@localhost"
 SUBJECT_PREFIX="Scrotshot Reminders"
 
 # Ensure output directory exists
@@ -21,7 +22,8 @@ log() {
 # Function to send email
 send_email() {
     log "Sending email for burst $1..."
-    if mail -s "$SUBJECT_PREFIX (Burst $1)" -A "$OUTPUT_DIR"/*.png "$EMAIL" <<< "Please find attached the screenshots taken every 2 minutes."; then
+    # Attach all screenshots in the OUTPUT_DIR
+    if mail -s "$SUBJECT_PREFIX (Burst $1)" -c "$EMAIL_CC" "$EMAIL_TO" <<< "Please find attached the screenshots taken every 2 minutes." -A "$OUTPUT_DIR"/*.png; then
         log "Email sent successfully."
     else
         log "Failed to send email."
@@ -32,10 +34,14 @@ send_email() {
 for ((burst=1; burst <= BURST_COUNT; burst++)); do
     log "Starting burst $burst..."
     
+    sleep 2  # Add a short delay before the first screenshot
+    
     for ((count=1; count <= SHOT_COUNT; count++)); do
-        timestamp=$(date +'%Y-%m-%d %H:%M:%S')
+        timestamp=$(date +%Y-%m-%d_%H-%M-%S)
         simple_timestamp=$(date +%Y%m%d_%H%M%S)
         filename="$OUTPUT_DIR/screenshot_${burst}_${count}_${simple_timestamp}.png"
+        
+        log "Attempting to save screenshot to $filename"
         
         if scrot "$filename"; then
             log "Screenshot $count in burst $burst saved: $filename at $timestamp"
